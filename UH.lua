@@ -1,4 +1,4 @@
-
+print('run')
 if not game:IsLoaded() then game.Loaded:Wait() end
 repeat task.wait() until game.Workspace:FindFirstChild(game.Players.LocalPlayer.Name)
 
