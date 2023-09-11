@@ -2005,7 +2005,7 @@ local function getPortalUSE ()
 		table.insert(IgnoreDifficulties, diffucltID)
 	end
 
-	for bonusId, bonusName in pairs(damageTypes) do
+	for bonusName, bonusId in pairs(damageTypes) do
 		if not table.find(GetSave('PortalUSE Bonus Ignore'), bonusName) then continue end
 		table.insert(IgnoreBonus, bonusId)
 	end
