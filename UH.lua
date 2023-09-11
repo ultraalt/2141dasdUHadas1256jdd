@@ -2000,7 +2000,7 @@ local function getPortalUSE ()
 	local IgnoreWorlds = {}
 	local IgnoreDifficulties = {}
 
-	for diffucltID, difficultName in pairs(challengeTypes) do
+	for difficultName, diffucltID in pairs(challengeTypes) do
 		if not table.find(GetSave('PortalUSE Difficulties Ignore'), difficultName) then continue end
 		table.insert(IgnoreDifficulties, diffucltID)
 	end
