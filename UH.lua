@@ -2689,7 +2689,7 @@ local function PlayMacroFunc ()
 			if not TypesAndMeaning[ AboutAction['type'] ] then continue end
 
 			if AboutAction['type'] ~= 'spawn_unit' then 
-				local distance = 1
+				local distance = 2
 
 				for _, unitInWorkspace in ipairs(workspace._UNITS:GetChildren()) do
 					if not unitInWorkspace:FindFirstChild('_shadow') then continue end
