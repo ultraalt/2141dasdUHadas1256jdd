@@ -2695,7 +2695,10 @@ local function PlayMacroFunc ()
 
 				for _, unitInWorkspace in ipairs(workspace._UNITS:GetChildren()) do
 					if not unitInWorkspace:FindFirstChild('_shadow') then continue end
-					local newDistance = ( unitInWorkspace._shadow.Position - StringToCFrame(AboutAction.pos).Position ).Magnitude 
+					local recordedMacroPos =  StringToCFrame(AboutAction.pos).Position
+					local unitPos = unitInWorkspace._shadow.Position
+					local newDistance = (Vector3.new(unitPos.X, 0, unitPos.Z) - Vector3.new(recordedMacroPos.X, 0, recordedMacroPos.Z)).Magnitude
+	
 					if unitInWorkspace:WaitForChild('_stats'):WaitForChild('player').Value ~= player or distance < newDistance then continue end
 
 					local cappedUpgrade = false
