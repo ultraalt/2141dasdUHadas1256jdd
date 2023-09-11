@@ -2630,7 +2630,7 @@ local TabsAndValues
 
 local function PlayMacroFunc ()
 	if RecordingMacro or not LevelData then return end
-	local MacroFile = GetSave('Selected Macro')
+	local MacroFile
 
 	if LevelData.floor_num then
 		MacroFile = GetSave('Selected Macro Map')['Tower'][LevelData._location_name]
@@ -2642,7 +2642,7 @@ local function PlayMacroFunc ()
 		if not MacroFile then MacroFile = GetSave('Selected Macro Map')['Other'][LevelData._location_name] or GetSave('Selected Macro Map')['Other'][LevelData.name] end
 		if not MacroFile and LevelData._gamemode ~= 'raid' then MacroFile = GetSave('Selected Macro Map')['Main'][LevelData._location_name] end
 	end
-	if not MacroFile then MacroFile = GetSave('Selected Macro') end
+	if not MacroFile or MacroFile == "" then MacroFile = GetSave('Selected Macro') end
 
 	if not MacroFile then return end
 
