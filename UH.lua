@@ -2119,12 +2119,12 @@ local function DeletePortalsFunc ()
 		local IgnoreBonus = {}
 		local IgnoreWorlds = {}
 		local DeleteDifficulties = {}
-		for diffucltID, difficultName in pairs(challengeTypes) do
+		for difficultName, diffucltID in pairs(challengeTypes) do
 			if not table.find(GetSave('Selected Portal Difficulties Delete'), difficultName) then continue end
 			table.insert(DeleteDifficulties, diffucltID)
 		end
 
-		for bonusId, bonusName in pairs(damageTypes) do
+		for bonusName, bonusId in pairs(damageTypes) do
 			if not table.find(GetSave('Ignore Bonus Delete'), bonusName) then continue end
 			table.insert(IgnoreBonus, bonusId)
 		end
