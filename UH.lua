@@ -2941,7 +2941,7 @@ StartAfterPlayersPortal.slider.Frame.Size = UDim2.new(math.clamp(GetSave("Portal
 
 
 StepDelaySlider.slider.SliderButton.MouseButton1Down:Connect(function()
-	sliderFunc(StepDelaySlider, "Step Delay", 0, 1, 0.01, 'seconds')
+	sliderFunc(StepDelaySlider, "Step Delay", 0.2, 1, 0.01, 'seconds')
 
 end)
 
