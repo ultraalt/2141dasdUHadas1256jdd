@@ -1,5 +1,14 @@
 
 if not game:IsLoaded() then game.Loaded:Wait() end
+
+local vu = game:GetService("VirtualUser")
+game.Players.LocalPlayer.Idled:connect(function()
+	vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+	wait(1)
+	vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+end)
+
+
 repeat task.wait() until game.Workspace:FindFirstChild(game.Players.LocalPlayer.Name)
 
 if game.PlaceId == 8304191830 then
@@ -304,13 +313,6 @@ local function math_round( roundIn , roundDig )
 	local mul = math.pow( 10, roundDig )
 	return ( math.floor( ( roundIn * mul ) + 0.5 )/mul )
 end
-
-local vu = game:GetService("VirtualUser")
-player.Idled:connect(function()
-	vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
-	wait(1)
-	vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
-end)
 
 local function getItemsData ()
 	local newItemsData = {}
@@ -2689,7 +2691,7 @@ local function PlayMacroFunc ()
 			if not TypesAndMeaning[ AboutAction['type'] ] then continue end
 
 			if AboutAction['type'] ~= 'spawn_unit' then 
-				local distance = 3
+				local distance = 1
 
 				for _, unitInWorkspace in ipairs(workspace._UNITS:GetChildren()) do
 					if not unitInWorkspace:FindFirstChild('_shadow') then continue end
