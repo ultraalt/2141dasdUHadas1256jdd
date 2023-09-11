@@ -107,14 +107,6 @@ local DefaultFiles = {
 }
 
 local PortalsList = {'Alien Portal', 'Summer Portal', 'Eclipse Portal', 'Puppet Portal', "Demon Leader's Portal"}
-local DifficultiesName = {
-	double_cost = 'High Cost',
-	fast_enemies = 'Fast Enemies',
-	tank_enemies = 'Tank Enemies',
-	shield_enemies = 'Shield Enemies',
-	regen_enemies = 'Regen Enemies',
-	short_range = 'Short Range'
-}
 
 local portalWorlds = {
 	dressrosa_infinite = 'Puppet Island (Summer)',
@@ -127,17 +119,18 @@ local portalWorlds = {
 	eclipse_portal = 'The Eclipse',
 }
 
-local Bonuses = {
-	physical = "Physical",
-	magic = 'Magic',
-	dark_damage = 'Dark',
-	ice_damage = 'Storm',
-	water_damage = 'Aqua',
-	fire_damage = 'Fire',
-	light_damage = 'Light',
-	air_damage = 'Air',
-}
 
+
+challengeTypes = {}
+damageTypes = {}
+
+for typeId, typeAbout in pairs(require( RS.src.Data.DamageTypes).TYPES ) do
+	damageTypes[typeAbout.name] = typeId
+end
+
+for challengeId, challengeAbout in pairs(require( RS.src.Data.ChallengeAndRewards ).standard_challenges) do
+	challengeTypes[ require(RS.src.Data.ChallengeAndRewards).challenges[challengeId].name ] = challengeId 
+end
 
 function deepcopy(orig)
 	local orig_type = type(orig)
@@ -975,12 +968,11 @@ local function MakeDDL (subPage, DDLTXT, scaleY)
 	newDDLLabel.TextXAlignment = Enum.TextXAlignment.Left
 	newDDLLabel.Text = DDLTXT
 
-	local newDDLButton = Instance.new('TextButton', newDDLFrame)
+	local newDDLButton = Instance.new('Frame', newDDLFrame)
 	newDDLButton.BackgroundColor3 = Color3.fromRGB(75, 75, 108)
 	newDDLButton.BorderSizePixel = 0
 	newDDLButton.Size = UDim2.new(1, 0, 0.408, 0)
 	newDDLButton.Position = UDim2.new(0, 0, 0.45, 0)
-	newDDLButton.Text = ''
 	MakeUICorner(0.15, newDDLButton)
 
 	local UIStroke = Instance.new('UIStroke', newDDLButton)
@@ -989,20 +981,26 @@ local function MakeDDL (subPage, DDLTXT, scaleY)
 	UIStroke.LineJoinMode = Enum.LineJoinMode.Round
 	UIStroke.Thickness = 1
 
-	local newDDLList = Instance.new('TextLabel', newDDLButton)
-	newDDLList.BackgroundTransparency = 1
-	newDDLList.AnchorPoint = Vector2.new(0.5, 0.5)
-	newDDLList.Size = UDim2.new(0.95, 0, 0.8, 0)
-	newDDLList.Position = UDim2.new(0.5, 0, 0.5, 0)
-	newDDLList.Font = Enum.Font.GothamBlack
-	newDDLList.TextScaled = true
-	newDDLList.TextXAlignment = Enum.TextXAlignment.Left
-	newDDLList.TextColor3 = Color3.fromRGB(255, 255, 255)
-	newDDLList.RichText = true
-	newDDLList.Text = 'None'
+	local ddlTextBox = Instance.new('TextBox', newDDLButton)
+	ddlTextBox.BackgroundTransparency = 1
+	ddlTextBox.AnchorPoint = Vector2.new(0, 0.5)
+	ddlTextBox.Size = UDim2.fromScale(0.98, 0.85)
+	ddlTextBox.Position = UDim2.fromScale(0.02,0.5)
+	ddlTextBox.Font = Enum.Font.GothamBold
+	ddlTextBox.TextScaled = true
+	ddlTextBox.TextXAlignment = Enum.TextXAlignment.Left
+	ddlTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+	ddlTextBox.RichText = true
+	ddlTextBox.Text = 'None'
+	ddlTextBox.PlaceholderText = 'Search'
 
+	local buttonTouch = Instance.new('TextButton', ddlTextBox)
+	buttonTouch.Text = ""
+	buttonTouch.BackgroundTransparency = 1
+	buttonTouch.ZIndex = 2
+	buttonTouch.Size = UDim2.fromScale(1,1)
 
-	return newDDLButton
+	return ddlTextBox
 end
 
 local function DDLlabel (ddlButton, newValue)
@@ -1019,11 +1017,11 @@ local function DDLlabel (ddlButton, newValue)
 
 		end
 
-		ddlButton.TextLabel.Text = newTXT
+		ddlButton.Text = newTXT
 
 	else
 		local newTXT = "None" if newValue ~= "" and newValue ~= nil then newTXT = newValue end
-		ddlButton.TextLabel.Text = newTXT
+		ddlButton.Text = newTXT
 	end
 end
 
@@ -1032,19 +1030,19 @@ local DDLColors = {
 	[false] = Color3.fromRGB(138, 138, 199)
 }
 
-local function GetDDL (ddlButton, items, multiple, keyName, secondKeyName, tabName)
+local function GetDDL (ddlButton, items, multiple, keyName, macroTabAbout)
 
-	local DDL = ddlButton.Parent:FindFirstChild('List')
+	local DDL = ddlButton.Parent:FindFirstChild('DDL')
 
 	if not DDL then
-		DDL = Instance.new('Frame', MainContent) DDL.Name = 'List' DDL.Visible = false
+		DDL = Instance.new('Frame', MainContent) DDL.Name = 'DDL' DDL.Visible = false
 		DDL.BackgroundColor3 = Color3.fromRGB(75, 75, 108)
+		DDL.Active = true
 		DDL.BorderSizePixel = 0
-		DDL.ZIndex = 555
-		--DDL.Size = UDim2.new(0.448, 0, 0.388, 0)
+		DDL.ZIndex = 506
 		MakeUICorner(0.02, DDL)
-		MakeUIPadding(0, 0.02, 0.02, 0, DDL)
-
+		MakeUIPadding(0.02, 0.02, 0.02, 0.02, DDL)
+		
 		local UIStroke = Instance.new('UIStroke', DDL)
 		UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
 		UIStroke.Color = Color3.fromRGB(189, 189, 255)
@@ -1053,8 +1051,7 @@ local function GetDDL (ddlButton, items, multiple, keyName, secondKeyName, tabNa
 
 		local ScrollingItems = Instance.new('ScrollingFrame', DDL) ScrollingItems.Name = 'ScrollingItems'
 		ScrollingItems.BackgroundTransparency = 1
-		ScrollingItems.Size = UDim2.new(1, 0, 0.97, 0)
-		ScrollingItems.Position = UDim2.new(0, 0, 0.03, 0)
+		ScrollingItems.Size = UDim2.fromScale(1,1)
 		ScrollingItems.ZIndex = 556
 		ScrollingItems.AutomaticCanvasSize = 'Y'
 		ScrollingItems.CanvasSize = UDim2.new(0,0,0,0)
@@ -1067,13 +1064,23 @@ local function GetDDL (ddlButton, items, multiple, keyName, secondKeyName, tabNa
 		local TemplateButton = Instance.new('TextButton', ScrollingItems) TemplateButton.Name = 'Template' TemplateButton.Visible = false
 		TemplateButton.BackgroundColor3 = Color3.fromRGB(138, 138, 199)
 		TemplateButton.BorderSizePixel = 0
-		TemplateButton.Size = UDim2.new(1, 0, 0.08, 0)
+		TemplateButton.Text = ""
+		TemplateButton.Size = UDim2.fromScale(1,0.07)
 		TemplateButton.ZIndex = 556
-		TemplateButton.RichText = true
-		TemplateButton.Font = Enum.Font.GothamBlack
-		TemplateButton.TextScaled = true
-		TemplateButton.TextStrokeTransparency = 0.65
-		TemplateButton.TextColor3 = Color3.fromRGB(255,255,255)
+		MakeUICorner(0.25, TemplateButton)
+
+		local TemplateLabel = Instance.new('TextLabel', TemplateButton)
+		TemplateLabel.BackgroundTransparency = 1
+		TemplateLabel.AnchorPoint = Vector2.new(0, 0.5)
+		TemplateLabel.Position = UDim2.fromScale(0,0.5)
+		TemplateLabel.Size = UDim2.fromScale(1,0.9)
+		TemplateLabel.ZIndex = 557
+		TemplateLabel.Font = Enum.Font.GothamBold
+		TemplateLabel.TextColor3 = Color3.fromRGB(255,255,255)
+		TemplateLabel.TextScaled = true
+		TemplateLabel.RichText = true
+		TemplateLabel.TextStrokeTransparency = 0.65
+
 
 		--DDL.Size = UDim2.new(1, 0, 0, DDL.AbsoluteSize.Y)
 		DDL.Position = UDim2.new(0, 0, 1, 0)
@@ -1088,27 +1095,31 @@ local function GetDDL (ddlButton, items, multiple, keyName, secondKeyName, tabNa
 	end
 
 	if not DDL.Visible then return end
+	local notMultipleSelected = nil
+	local itemsTable = items() or {}
 
-	for _, item in ipairs(items) do
+	for _, item in ipairs(itemsTable) do
 		local newItem = DDL.ScrollingItems.Template:Clone() newItem.Name = 'item'
 		newItem.Parent = DDL.ScrollingItems
-		newItem.Text = item
+		newItem.TextLabel.Text = item
 		newItem.Visible = true
 
-		local itemSelected = false
+		local itemSelected = GetSave(keyName) == item
 
 		if type(GetSave(keyName)) == 'table' then
 
-			if secondKeyName then
-				itemSelected = GetSave(keyName)[tabName][secondKeyName] == item
+			if macroTabAbout then
+				itemSelected = GetSave(keyName)[macroTabAbout.Tab][macroTabAbout.Map] == item
 			else
 				itemSelected = table.find(GetSave(keyName), item)
 			end
 
-		else itemSelected = GetSave(keyName) == item
 		end
 
-		if itemSelected then newItem.BackgroundColor3 = DDLColors[true] end
+		if itemSelected then 
+			newItem.BackgroundColor3 = DDLColors[true] 
+			if not multiple then notMultipleSelected = newItem end
+		end
 
 		newItem.MouseButton1Click:Connect(function()
 			local isSelected = false
@@ -1119,6 +1130,7 @@ local function GetDDL (ddlButton, items, multiple, keyName, secondKeyName, tabNa
 
 				if itemInTable then 
 					table.remove(newSave, itemInTable)
+					isSelected = false
 				else
 					table.insert(newSave, item)
 					isSelected = true
@@ -1130,34 +1142,35 @@ local function GetDDL (ddlButton, items, multiple, keyName, secondKeyName, tabNa
 
 				local oldKey = GetSave(keyName)
 
-				for _, button in ipairs(DDL.ScrollingItems:GetChildren()) do
-					if button.Name ~= 'item' then continue end
-					if (not secondKeyName and button.Text == oldKey) or (secondKeyName and button.Text == oldKey[tabName][secondKeyName])  then button.BackgroundColor3 = DDLColors[false] break end
+				if notMultipleSelected then
+					notMultipleSelected.BackgroundColor3 = DDLColors[false]
+					notMultipleSelected = nil
 				end
 
-				local toSave = "" if secondKeyName then toSave = deepcopy(oldKey) toSave[tabName][secondKeyName] = "" end
+				if macroTabAbout then
+					oldKey = deepcopy(oldKey)
 
-				if not secondKeyName and oldKey ~= item then toSave = item
-				elseif secondKeyName and oldKey[tabName][secondKeyName] ~= item then toSave[tabName][secondKeyName] = item
+					if oldKey[macroTabAbout.Tab][macroTabAbout.Map] ~= item then
+						oldKey[macroTabAbout.Tab][macroTabAbout.Map] = item isSelected = true
+					else oldKey[macroTabAbout.Tab][macroTabAbout.Map] = "" isSelected = false
+					end
+
+				else
+
+					if oldKey == item then oldKey = "" isSelected = false
+					else oldKey = item isSelected = true
+					end
+
 				end
 
+				if isSelected then
+					notMultipleSelected = newItem
+				end
 
-
-				Save(keyName, toSave)
-				if keyName == "Selected Macro" then getMacroUnits(toSave, MacroUnitsTextBlocks) end
-				
-				local oldKey = GetSave(keyName)
-
-
-				isSelected = (secondKeyName and toSave[tabName][secondKeyName] ~= "") or ( not secondKeyName and toSave ~= "")
+				Save(keyName, oldKey)
+				if keyName == "Selected Macro" and IsLobby then getMacroUnits(oldKey, MacroUnitsTextBlocks) end
 
 			end
-
-			local fillDDL = GetSave(keyName) if secondKeyName then fillDDL = fillDDL[tabName][secondKeyName] end
-
-
-
-			DDLlabel(ddlButton, fillDDL)
 
 			newItem.BackgroundColor3 = DDLColors[isSelected]
 
@@ -1809,96 +1822,138 @@ for unitOrder, doubleButtonFrame in ipairs(AP_PositionButtons) do
 	
 end
 
+local function makeDDLFunctionable (ddlBox, multiple, keyName, itemsFunc, macroTab)
 
-SelectTiers.MouseButton1Click:Connect(function()
-	local items = {}
-	for number = 1, 15 do
-		table.insert(items, number)
+	local typingConnection
+	local exitSearchConnection
+
+	ddlBox.TextButton.MouseButton1Click:Connect(function()
+		ddlBox.TextButton.Visible = false
+		ddlBox.Text = ""
+		GetDDL(ddlBox, itemsFunc, multiple, keyName, macroTab)
+
+		typingConnection = RunS.Heartbeat:Connect(function()
+			local ddl = ddlBox.Parent:FindFirstChild('DDL'):FindFirstChild('ScrollingItems')
+
+			if not ddl then return end
+
+			for _, itemDDL in ipairs(ddl:GetChildren()) do
+				if not itemDDL:FindFirstChild('TextLabel') or itemDDL.Name ~= 'item' then continue end
+
+				local available = string.find( string.lower(itemDDL.TextLabel.Text) , string.lower(ddlBox.Text) )
+
+				if available and not itemDDL.Visible then
+					itemDDL.Visible = true
+				elseif not available and itemDDL.Visible then
+					itemDDL.Visible = false
+
+				end
+			end
+
+		end)
+
+		exitSearchConnection = UIS.InputBegan:Connect(function(input, gameprocess)
+			if gameprocess or (input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch) then return end
+			exitSearchConnection:Disconnect()
+
+			local itemsChosen = GetSave(keyName)
+
+			if macroTab then
+				itemsChosen = itemsChosen[macroTab.Tab][macroTab.Map]
+			end
+
+			DDLlabel(ddlBox, itemsChosen)
+
+			if typingConnection then typingConnection:Disconnect() typingConnection = nil end
+
+			GetDDL(ddlBox)
+
+			ddlBox.TextButton.Visible = true
+		end)
+
+	end)
+
+	local itemsChosen = GetSave(keyName)
+
+	if macroTab then
+		itemsChosen = itemsChosen[macroTab.Tab][macroTab.Map]
 	end
 
-	GetDDL(SelectTiers, items, true, 'PortalUSE Tiers')
+	DDLlabel(ddlBox, itemsChosen)
+end
 
-end)
-DDLlabel(SelectTiers, GetSave('PortalUSE Tiers'))
+makeDDLFunctionable(SelectTiers, true, 'PortalUSE Tiers',
+	function() 
+		local items = {} 
+		for number = 1, 15 do
+			table.insert(items, number)
+		end
 
-SelectPortalName.MouseButton1Click:Connect(function()
-	local items = table.clone(PortalsList)
+		return items
+	end
+)
 
-	GetDDL(SelectPortalName, items, true, 'PortalUSE Portals')
+makeDDLFunctionable(SelectPortalName, true, 'PortalUSE Portals', function() return table.clone(PortalsList) end)
 
-end)
-DDLlabel(SelectPortalName, GetSave('PortalUSE Portals'))
-
-SelectIgnoreDifficulties.MouseButton1Click:Connect(function()
+makeDDLFunctionable(SelectIgnoreDifficulties, true, 'PortalUSE Difficulties Ignore', function()
 	local items = {}
 
-	for _, difficultyName in pairs(DifficultiesName) do
+	for difficultyName, _ in pairs(challengeTypes) do
 		table.insert(items, difficultyName)
 	end
 
-	GetDDL(SelectIgnoreDifficulties, items, true, 'PortalUSE Difficulties Ignore')
-
+	return items
 end)
-DDLlabel(SelectIgnoreDifficulties, GetSave('PortalUSE Difficulties Ignore'))
 
-SelectIgnoreDMGBonus.MouseButton1Click:Connect(function()
+makeDDLFunctionable(SelectIgnoreDMGBonus, true, 'PortalUSE Bonus Ignore', function()
 	local items = {}
 
-	for _, bonusName in pairs(Bonuses) do
+	for bonusName,_ in pairs(damageTypes) do
 		table.insert(items, bonusName)
 	end
 
-	GetDDL(SelectIgnoreDMGBonus, items, true, 'PortalUSE Bonus Ignore')
-
+	return items
 end)
-DDLlabel(SelectIgnoreDMGBonus, GetSave('PortalUSE Bonus Ignore'))
 
-SelectIgnoreWorlds.MouseButton1Click:Connect(function()
+makeDDLFunctionable(SelectIgnoreWorlds, true, 'PortalUSE Worlds Ignore', function()
 	local items = {}
 
 	for _, worldName in pairs(portalWorlds) do
 		table.insert(items, worldName)
 	end
 
-	GetDDL(SelectIgnoreWorlds, items, true, 'PortalUSE Worlds Ignore')
-
+	return items
 end)
-DDLlabel(SelectIgnoreWorlds, GetSave('PortalUSE Worlds Ignore'))
 
-
-StoryInf_SelectWorld.MouseButton1Click:Connect(function()
+makeDDLFunctionable(StoryInf_SelectWorld, false, 'StoryInf_World', function()
 	local items = {}
-	
+
 	for _, worldModule in ipairs(RS.src.Data.Worlds:GetChildren()) do
 		if not worldModule:IsA('ModuleScript') then continue end
-		
+
 		for _,worldAbout in pairs(require(worldModule)) do
 			if not worldAbout.infinite and not worldAbout.legend_stage then continue end
-			
+
 			local worldName = worldAbout.name
-			
+
 			if worldAbout.legend_stage  then
 				worldName = string.format('<font color="#ffa61f">%s</font>', worldName)
 			end
-			
+
 			table.insert(items, worldName)
 		end
-		
+
 	end
 
-	GetDDL(StoryInf_SelectWorld, items, false, 'StoryInf_World')
-	
-	Save('StoryInf_Level', '')
-	DDLlabel(StoryInf_SelectLevel, '')
+	return items
 end)
-DDLlabel(StoryInf_SelectWorld, GetSave('StoryInf_World'))
 
-StoryInf_SelectLevel.MouseButton1Click:Connect(function()
+makeDDLFunctionable(StoryInf_SelectLevel, false, 'StoryInf_Level', function()
 	local items = {}
 	local selectedWorld = GetSave('StoryInf_World')
 	local legendStage = string.match(selectedWorld, ">(.+)<") if legendStage then selectedWorld = legendStage end
 	if selectedWorld == '' then return end
-	
+
 	local levelsInWorld = {}
 	for _, worldModule in ipairs(RS.src.Data.Worlds:GetChildren()) do
 		if not worldModule:IsA('ModuleScript') or #levelsInWorld > 0 then continue end
@@ -1906,42 +1961,38 @@ StoryInf_SelectLevel.MouseButton1Click:Connect(function()
 		for _,worldAbout in pairs(require(worldModule)) do
 			if not worldAbout.levels or (not legendStage and not worldAbout.infinite) then continue end
 			if legendStage and not worldAbout.legend_stage then continue end
-			
+
 			if selectedWorld == worldAbout.name then
 				if not legendStage then levelsInWorld[1] = worldAbout.infinite.id end
 				local amountOfLevels = 0
 				for _,_ in pairs(worldAbout.levels) do amountOfLevels+=1 end
-				
+
 				for levelOrder = 1,amountOfLevels do
 					levelsInWorld[#levelsInWorld+1] = worldAbout.levels[tostring(levelOrder)].id
 				end
-				
+
 				break 
 			end
 		end
 
 	end
-	
+
 	for _, levelModule in ipairs(RS.src.Data.Levels:GetDescendants()) do
 		if not levelModule:IsA('ModuleScript') then continue end
-		
+
 		local levelsModule = require(levelModule)
-		
+
 		if not levelsModule[levelsInWorld[1]] then continue end
-		
+
 		for _, levelId in ipairs(levelsInWorld) do
 			table.insert(items, levelsModule[levelId].name)
 		end
 
 	end
-	
-	
 
-	GetDDL(StoryInf_SelectLevel, items, false, 'StoryInf_Level')
 
+	return items
 end)
-DDLlabel(StoryInf_SelectLevel, GetSave('StoryInf_Level'))
-
 
 local function getPortalUSE ()
 
@@ -1949,12 +2000,12 @@ local function getPortalUSE ()
 	local IgnoreWorlds = {}
 	local IgnoreDifficulties = {}
 
-	for diffucltID, difficultName in pairs(DifficultiesName) do
+	for diffucltID, difficultName in pairs(challengeTypes) do
 		if not table.find(GetSave('PortalUSE Difficulties Ignore'), difficultName) then continue end
 		table.insert(IgnoreDifficulties, diffucltID)
 	end
 
-	for bonusId, bonusName in pairs(Bonuses) do
+	for bonusId, bonusName in pairs(damageTypes) do
 		if not table.find(GetSave('PortalUSE Bonus Ignore'), bonusName) then continue end
 		table.insert(IgnoreBonus, bonusId)
 	end
@@ -1987,100 +2038,78 @@ local function getPortalUSE ()
 end
 
 
-
-SelectedTiersDelete.MouseButton1Click:Connect(function()
+makeDDLFunctionable(SelectedTiersDelete, true, 'Selected Tiers Delete', function()
 	local items = {}
 	for number = 1, 15 do
 		table.insert(items, number)
 	end
 
-	GetDDL(SelectedTiersDelete, items, true, 'Selected Tiers Delete')
-
+	return items
 end)
 
-DDLlabel(SelectedTiersDelete, GetSave('Selected Tiers Delete'))
-
-SelectedPortalsDelete.MouseButton1Click:Connect(function()
-	local items = table.clone(PortalsList)
-
-	GetDDL(SelectedPortalsDelete, items, true, 'Selected Portals Delete')
-
+makeDDLFunctionable(SelectedPortalsDelete, true, 'Selected Portals Delete', function()
+	return table.clone(PortalsList)
 end)
-DDLlabel(SelectedPortalsDelete, GetSave('Selected Portals Delete'))
 
-
-SelectedDifficultiesDelete.MouseButton1Click:Connect(function()
+makeDDLFunctionable(SelectedDifficultiesDelete, true, 'Selected Portal Difficulties Delete', function()
 	local items = {}
 
-	for _, difficultyName in pairs(DifficultiesName) do
+	for difficultyName,_ in pairs(challengeTypes) do
 		table.insert(items, difficultyName)
 	end
 
-	GetDDL(SelectedDifficultiesDelete, items, true, 'Selected Portal Difficulties Delete')
-
+	return items
 end)
-DDLlabel(SelectedDifficultiesDelete, GetSave('Selected Portal Difficulties Delete'))
 
-SelectIgnoreBonusDelete.MouseButton1Click:Connect(function()
+makeDDLFunctionable(SelectIgnoreBonusDelete, true, 'Ignore Bonus Delete', function()
 	local items = {}
 
-	for _, bonusName in pairs(Bonuses) do
+	for bonusName, _ in pairs(damageTypes) do
 		table.insert(items, bonusName)
 	end
 
-	GetDDL(SelectIgnoreBonusDelete, items, true, 'Ignore Bonus Delete')
-
+	return items
 end)
-DDLlabel(SelectIgnoreBonusDelete, GetSave('Ignore Bonus Delete'))
 
-
-SelectIgnoreWorldsDelete.MouseButton1Click:Connect(function()
+makeDDLFunctionable(SelectIgnoreWorldsDelete, true, 'Ignore Worlds Delete', function()
 	local items = {}
 
 	for _, worldName in pairs(portalWorlds) do
 		table.insert(items, worldName)
 	end
 
-	GetDDL(SelectIgnoreWorldsDelete, items, true, 'Ignore Worlds Delete')
-
+	return items
 end)
-DDLlabel(SelectIgnoreWorldsDelete, GetSave('Ignore Worlds Delete'))
 
-Challenge_IgnoreWorlds.MouseButton1Click:Connect(function()
+makeDDLFunctionable(Challenge_IgnoreWorlds, true, 'Challenge_IgnoreWorlds', function()
 	local items = {}
 
 	for _, worldName in pairs(macroMapList.Main) do
 		table.insert(items, worldName)
 	end
 
-	GetDDL(Challenge_IgnoreWorlds, items, true, 'Challenge_IgnoreWorlds')
-
+	return items
 end)
-DDLlabel(Challenge_IgnoreWorlds, GetSave('Challenge_IgnoreWorlds'))
 
-Challenge_IgnoreDifficulty.MouseButton1Click:Connect(function()
+makeDDLFunctionable(Challenge_IgnoreDifficulty, true, 'Challenge_IgnoreDifficulties', function()
 	local items = {}
 
-	for _, difficultyName in pairs(DifficultiesName) do
+	for difficultyName,_ in pairs(challengeTypes) do
 		table.insert(items, difficultyName)
 	end
 
-	GetDDL(Challenge_IgnoreDifficulty, items, true, 'Challenge_IgnoreDifficulties')
-
+	return items
 end)
-DDLlabel(Challenge_IgnoreDifficulty, GetSave('Challenge_IgnoreDifficulties'))
 
-Challenge_IgnoreRewards.MouseButton1Click:Connect(function()
+makeDDLFunctionable(Challenge_IgnoreRewards, true, 'Challenge_IgnoreRewards', function()
 	local items = {}
 
 	for _, reward in pairs(require(RS.src.Data.ChallengeAndRewards).rewards) do
 		table.insert(items, reward.name)
 	end
 
-	GetDDL(Challenge_IgnoreRewards, items, true, 'Challenge_IgnoreRewards')
-
+	return items
 end)
-DDLlabel(Challenge_IgnoreRewards, GetSave('Challenge_IgnoreRewards'))
 
 local function DeletePortalsFunc ()
 	if not IsLobby then return end
@@ -2090,12 +2119,12 @@ local function DeletePortalsFunc ()
 		local IgnoreBonus = {}
 		local IgnoreWorlds = {}
 		local DeleteDifficulties = {}
-		for diffucltID, difficultName in pairs(DifficultiesName) do
+		for diffucltID, difficultName in pairs(challengeTypes) do
 			if not table.find(GetSave('Selected Portal Difficulties Delete'), difficultName) then continue end
 			table.insert(DeleteDifficulties, diffucltID)
 		end
 
-		for bonusId, bonusName in pairs(Bonuses) do
+		for bonusId, bonusName in pairs(damageTypes) do
 			if not table.find(GetSave('Ignore Bonus Delete'), bonusName) then continue end
 			table.insert(IgnoreBonus, bonusId)
 		end
@@ -2359,6 +2388,7 @@ MacroTabsListLayout.FillDirection = Enum.FillDirection.Horizontal
 MacroTabsListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 MacroTabsListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 
+
 local RightOrders = {Main = 1, Tower = 2, Raid = 3, Portal = 4, Other = 5}
 local viewingTab = nil
 for tabName, mapsList in pairs(macroMapList) do
@@ -2381,16 +2411,6 @@ for tabName, mapsList in pairs(macroMapList) do
 	newTab.Name = tabName
 	newTab.LayoutOrder = RightOrders[tabName]
 	newTab.ZIndex = 5
-
-	newTab.MouseEnter:Connect(function()
-		local TweenButton = TS:Create(newTab, newPageButtonBCInfo, {BackgroundTransparency = 0.9})
-		TweenButton:Play()
-	end)
-
-	newTab.MouseLeave:Connect(function()
-		local TweenButton = TS:Create(newTab, newPageButtonBCInfo, {BackgroundTransparency = 1})
-		TweenButton:Play()
-	end)
 
 	newTab.MouseButton1Click:Connect(function()
 		if viewingTab == newTab then return end
@@ -2426,9 +2446,8 @@ for tabName, mapsList in pairs(macroMapList) do
 	for _, mapName in ipairs(mapsList) do
 
 		local newDDLMacroMap = MakeDDL(MacroList, mapName, 0.023)
-
-		newDDLMacroMap.MouseButton1Click:Connect(function()
-
+		
+		makeDDLFunctionable(newDDLMacroMap, false, 'Selected Macro Map', function()
 			local MacrosList = listfiles('Ultra Hub\\Anime Adventures')
 
 			local items = {}
@@ -2439,14 +2458,9 @@ for tabName, mapsList in pairs(macroMapList) do
 				table.insert(items, macroName)
 
 			end
-
-			GetDDL(newDDLMacroMap, items, false, 'Selected Macro Map', mapName, tabName)
-
-		end)
-
-		local fillDDL = GetSave('Selected Macro Map')
-
-		DDLlabel(newDDLMacroMap, fillDDL[tabName][mapName])
+			
+			return items
+		end, {Tab = tabName, Map = mapName})
 
 
 	end
@@ -2565,8 +2579,8 @@ local function RecordMacroFunc ()
 	end)
 
 	connections[2] = workspace._UNITS.ChildRemoved:Connect(function(child)
-		if child:WaitForChild('_stats').player.Value ~= player or not child._stats:FindFirstChild('uuid') then return end
-		if not child:FindFirstChild('_shadow') then return end
+		if not child:FindFirstChild('_stats') or not child._stats:FindFirstChild('player') or child._stats.player.Value ~= player then return end
+		if not child._stats:FindFirstChild('uuid') or not child:FindFirstChild('_shadow') then return end
 		
 		local unitName = nil
 
@@ -2675,7 +2689,7 @@ local function PlayMacroFunc ()
 			if not TypesAndMeaning[ AboutAction['type'] ] then continue end
 
 			if AboutAction['type'] ~= 'spawn_unit' then 
-				local distance = 10 --if AboutAction['type'] == 'sell_unit_ingame' then distance = 0.3 end
+				local distance = 1
 
 				for _, unitInWorkspace in ipairs(workspace._UNITS:GetChildren()) do
 					if not unitInWorkspace:FindFirstChild('_shadow') then continue end
@@ -2686,7 +2700,7 @@ local function PlayMacroFunc ()
 
 					if AboutAction['type'] == 'upgrade_unit_ingame' then
 
-
+						
 						for equippedslot, unitAbout in pairs(EquippedUnitsAbout) do
 							if unitAbout.id ~= unitInWorkspace._stats.id.Value then continue end
 							if unitAbout.uuid ~= unitInWorkspace._stats.uuid.Value then continue end							
@@ -2705,7 +2719,6 @@ local function PlayMacroFunc ()
 			else
 				for uuid, aboutUnit in pairs(EquippedUnits) do
 					if aboutUnit.id ~= unitName then continue end
-					unitName = aboutUnit.id
 					unitUUID = uuid
 					break
 				end
@@ -2724,32 +2737,28 @@ local function PlayMacroFunc ()
 			if LastMacroStartedAt ~= CurrentMacroStartedAt then break end
 
 			if AboutAction['type'] == 'spawn_unit' then
-				local unitsBefore = 0
-				for _, unitInWorkspace in ipairs(workspace._UNITS:GetChildren()) do
-					if not unitInWorkspace:FindFirstChild('_shadow') then continue end
-					if not unitInWorkspace:FindFirstChild("_stats"):FindFirstChild('id') or unitInWorkspace._stats.id.Value ~= unitName then continue end
-					if unitInWorkspace._stats:WaitForChild('player').Value ~= player or unitInWorkspace._stats:WaitForChild('uuid').Value ~= unitUUID then continue end
-					unitsBefore += 1
-				end
-
+				
+				local detectNewUnit
+				local unitSpawned = false
+				
+				detectNewUnit = workspace._UNITS.ChildAdded:Connect(function(child)
+					if not child:WaitForChild('_shadow', 1) then return end
+					if child:WaitForChild('_stats'):WaitForChild('id').Value ~= unitName or child._stats:WaitForChild('uuid').Value ~= unitUUID then return end
+					if child._stats:WaitForChild('player').Value ~= player then return end
+					unitSpawned = true
+					
+				end)
+				
 				task.spawn(function() Event['spawn_unit']:InvokeServer( unitUUID, StringToCFrame( AboutAction['cframe'] ) ) end)
 
 				local tries = 0
 				repeat
 					task.wait(0.1)
 					tries += 1
-					local unitsCounted = 0
-
-					for _, unitInWorkspace in ipairs(workspace._UNITS:GetChildren()) do
-						if not unitInWorkspace:FindFirstChild('_shadow') then continue end
-						if not unitInWorkspace:FindFirstChild("_stats"):FindFirstChild('id') or unitInWorkspace._stats.id.Value ~= unitName then continue end
-						if unitInWorkspace._stats:WaitForChild('player').Value ~= player or unitInWorkspace._stats:WaitForChild('uuid').Value ~= unitUUID then continue end
-						unitsCounted += 1
-					end
-
-					if unitsCounted ~= unitsBefore then unitsBefore = -1 end
-				until unitsBefore == -1 or tries >= 25
-
+				until unitSpawned or tries >= 25
+				
+				detectNewUnit:Disconnect()
+				
 			else
 				task.spawn(function() Event[ AboutAction['type'] ]:InvokeServer(unit) end)
 			end
@@ -2814,17 +2823,17 @@ local function MoveSlider(slider, min, max, step, abbr)
 	local RoundedOffsetClamped = math.floor(xOffsetClamped + 0.5)
 
 	local sliderValue =  RoundedOffsetClamped / roundedAbsSize
-	local newValue = sliderValue * max
-
-	local resultValue = math.clamp( newValue - newValue % step, min, max)
-	local intervalValue = math.clamp( newValue, min, max)
-	if intervalValue-resultValue >= step/2 and resultValue >0 then resultValue += step end
+	local newValue = math.clamp(sliderValue, 0, 1) * (max - min) + min
 	
-	if resultValue <1 then resultValue = math.floor( ((resultValue*100)+0.5) )/100 else resultValue = math.floor(resultValue) end
+	local resultValue = math.clamp(newValue - newValue % step, min, max)	
 	
+	if newValue % step / step > 0.5 then
+		resultValue += step
+	end
 	
+	if resultValue <1 then resultValue = math.floor( ((resultValue*100)+0.5) )/100 end
 	
-	slider.Frame.Size = UDim2.new(math.clamp(resultValue/max, 0, 1), 0, 1, 0)
+	slider.Frame.Size = UDim2.fromScale( math.clamp(sliderValue, 0, 1), 1 )
 	
 	if not slider.Parent:FindFirstChild('TextBox') then 
 		slider.Parent.AmountLabel.Text = string.format("[%s/%s]", resultValue, max)
@@ -2936,7 +2945,7 @@ StepDelaySlider.slider.SliderButton.MouseButton1Down:Connect(function()
 
 end)
 
-selectedMacroDDL.MouseButton1Click:Connect(function()
+makeDDLFunctionable(selectedMacroDDL, false, 'Selected Macro', function()
 	local MacrosList = listfiles('Ultra Hub\\Anime Adventures')
 
 	local items = {}
@@ -2948,10 +2957,8 @@ selectedMacroDDL.MouseButton1Click:Connect(function()
 
 	end
 
-	GetDDL(selectedMacroDDL, items, false, 'Selected Macro')
+	return items
 end)
-
-DDLlabel(selectedMacroDDL, GetSave('Selected Macro'))
 if IsLobby then getMacroUnits(GetSave('Selected Macro'), MacroUnitsTextBlocks) end
 
 
@@ -2959,6 +2966,7 @@ createMacroBox.FocusLost:Connect(function(enterPressed)
 	if not enterPressed and createMacroBox.Text ~= '' then return end
 
 	writefile('Ultra Hub\\Anime Adventures\\' .. createMacroBox.Text .. '.json', HttpService:JSONEncode({}))
+	createMacroBox.Text = ""
 end)
 
 deleteMacroButton.MouseButton1Click:Connect(function()
@@ -3016,8 +3024,8 @@ equipMacroUnitsButton.MouseButton1Click:Connect(function()
 	equippingMacroUnits = false
 end)
 
-selectedCapsulesDDL.MouseButton1Click:Connect(function()
 
+makeDDLFunctionable(selectedCapsulesDDL, true, 'Ignored Capsules', function()
 	local items = GetSave('Ignored Capsules')
 
 	for itemKey, itemData in pairs(get_inventory_items()) do
@@ -3030,11 +3038,9 @@ selectedCapsulesDDL.MouseButton1Click:Connect(function()
 
 	end
 
-	GetDDL(selectedCapsulesDDL, items, true, 'Ignored Capsules')
-
+	return items
 end)
 
-DDLlabel(selectedCapsulesDDL, GetSave('Ignored Capsules'))
 
 local function AutoOpenCapsulesFunc ()
 	if not IsLobby then return end
@@ -3071,7 +3077,7 @@ skinsRarityColors = {
 	--[nil] = '<font color="#ffffff">%s</font>'
 }
 
-selectedSkinsDDL.MouseButton1Click:Connect(function()
+makeDDLFunctionable(selectedSkinsDDL, true, 'Delete Skins', function()
 	local items = GetSave('Delete Skins')
 
 	for _, itemData in pairs(get_inventory_items_unique_items()) do
@@ -3086,12 +3092,8 @@ selectedSkinsDDL.MouseButton1Click:Connect(function()
 
 	end
 
-
-	GetDDL(selectedSkinsDDL, items, true, 'Delete Skins')
-
+	return items
 end)
-
-DDLlabel(selectedSkinsDDL, GetSave('Delete Skins'))
 
 local function AutoDeleteSkinsFunc ()
 	if not IsLobby then return end
@@ -4215,19 +4217,17 @@ end
 
 ShowPoints.MouseButton1Click:Connect(ShowPointsFunc)
 
-AutoSkillSelectedUnits.MouseButton1Click:Connect(function()
+makeDDLFunctionable(AutoSkillSelectedUnits, true, 'AutoSkillUnits', function()
 	local items = {}
 
 	for _, unitID in pairs(autoUseAbilityUnitsTable) do
 		local unitName = oldItemsData[unitID] if not unitName then continue end
 		table.insert(items, unitName.Name)
-		
+
 	end
 
-	GetDDL(AutoSkillSelectedUnits, items, true, 'AutoSkillUnits')
-
+	return items
 end)
-DDLlabel(AutoSkillSelectedUnits, GetSave('AutoSkillUnits'))
 
 checkBoxFunc(StoryInf_AutoJoin)
 checkBoxFunc(StoryInf_Hard, false, false, 'Hard_StoryInf')
@@ -4549,7 +4549,7 @@ if IsLobby then
 			local Challenge_IgnoreDifficulties = GetSave('Challenge_IgnoreDifficulties')
 			local Challenge_IgnoreWorlds = GetSave('Challenge_IgnoreWorlds')
 			
-			for difID, difName in pairs(DifficultiesName) do
+			for difName, difID in pairs(challengeTypes) do
 				if table.find(Challenge_IgnoreDifficulties, difName) and difID == aboutChallenge.current_challenge.Value then challengeNeed = false break end
 			end
 			
