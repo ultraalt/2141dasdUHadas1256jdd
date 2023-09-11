@@ -2973,8 +2973,8 @@ end)
 
 deleteMacroButton.MouseButton1Click:Connect(function()
 
-	local item = selectedMacroDDL.TextLabel.Text
-	if item == "" or item == "None" then return end
+	local item = GetSave("Selected Macro")
+	if item == "" or item == "None" or not item then return end
 
 	local macroExist = isfile('Ultra Hub\\Anime Adventures\\' .. item)
 	local macroExistjson = isfile('Ultra Hub\\Anime Adventures\\' .. item .. '.json')
