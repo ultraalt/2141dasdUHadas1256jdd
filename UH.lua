@@ -3742,7 +3742,7 @@ local function autoGamePLUS ()
 		local AutoSU = GetSave(AutoSellUnits.Name) -- AUTO SELL UNITS
 		local AutoSF = GetSave(AutoSellFarms.Name) -- AUTO SELL FARMS
 		local AutoL = GetSave('AutoLeave_WAVE')
-		
+
 		local AutoSUWave = GetSave('AutoSellUnitsWave')
 		local AutoSFWave = GetSave('AutoSellFarmsWave')
 		local AutoLWave = GetSave('AutoLeaveOnWave')
@@ -4507,9 +4507,8 @@ end)
 
 if GameFinished and not IsLobby then
 	game:GetService("ReplicatedStorage").endpoints.client_to_server.vote_start:InvokeServer()
-
-	repeat task.wait() until GameFinished.Value and ResultUI.Enabled
-
+	
+	repeat task.wait(0.1) until (GameFinished.Value and ResultUI.Enabled) or (GetSave('AutoLeave_WAVE') and tonumber(GetSave('AutoLeaveOnWave')) <= workspace._wave_num.Value)
 	if GetSave(ResultWebhook.Name) then
 		webhook()
 	end
