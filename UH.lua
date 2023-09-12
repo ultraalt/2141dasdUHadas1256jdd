@@ -2862,7 +2862,7 @@ StepDelaySlider.TextBox.FocusLost:Connect(function()
 	SliderBoxFunc(StepDelaySlider, "Step Delay", 'seconds', 1)
 end)
 StepDelaySlider.TextBox.Text = string.format("%s seconds", GetSave("Step Delay"))
-StepDelaySlider.slider.Frame.Size = UDim2.new(math.clamp(GetSave("Step Delay"), 0, 1), 0, 1, 0)
+StepDelaySlider.slider.Frame.Size = UDim2.new(math.clamp( (GetSave("Step Delay") - 0.2) / 0.8, 0, 1), 0, 1, 0)
 
 
 local function sliderFunc (slideFrame, keyName, min, max, step, abbr)
