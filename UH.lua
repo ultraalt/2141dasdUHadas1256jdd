@@ -3218,7 +3218,7 @@ local function AutoBuffFunc (unitID, keySave)
 					for _, unitWorkspace in ipairs(unitsFolder) do if not unitWorkspace or not unitWorkspace.Parent or unitWorkspace.Parent ~= workspace._UNITS then allFourOnMap = false continue end end
 					
 					Event['use_active_attack']:InvokeServer(  unitsFolder[ tonumber(autoBuffOrder[int]) ]  )
-					local AbilityCooldown = unitsFolder[ tonumber(autoBuffOrder[int]) ]._stats.active_attack_cooldown if AbilityCooldown then AbilityCooldown = AbilityCooldown.Value/4 + 0.1 else AbilityCooldown = 15.4 end
+					local AbilityCooldown = unitsFolder[ tonumber(autoBuffOrder[int]) ]._stats.active_attack_cooldown if AbilityCooldown then AbilityCooldown = AbilityCooldown.Value/4 + 0.3 else AbilityCooldown = 15.4 end
 					task.wait( math.clamp(AbilityCooldown, 15.4, 60) )
 				end
 					
