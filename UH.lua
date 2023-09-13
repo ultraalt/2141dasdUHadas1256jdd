@@ -2580,34 +2580,51 @@ local function RecordMacroFunc ()
 
 	end)
 
-	connections[2] = workspace._UNITS.ChildRemoved:Connect(function(child)
-		if not child:FindFirstChild('_stats') or not child._stats:FindFirstChild('player') or child._stats.player.Value ~= player then return end
-		if not child._stats:FindFirstChild('uuid') or not child:FindFirstChild('_shadow') then return end
-		
-		local unitName = nil
+	connections[2] = PGUI.UnitUpgrade.Primary.Container.Main.Main.Buttons.Sell.MouseButton1Up:Connect(function()
+		if PGUI.UnitUpgrade.Primary.Container.Main.Main.Buttons.Sell.Main.Text.Text == "UNSELLABLE!" then return end
+		local unitSold
 
-		for equippedUnitUUID, equippedUnitAbout in pairs(EquippedUnits) do
-			if equippedUnitUUID ~= child._stats.uuid.Value or equippedUnitAbout.id ~= child._stats.id.Value then continue end
-			unitName = equippedUnitAbout.id
-		end
+		unitSold = workspace._UNITS.ChildRemoved:Connect(function(child)
+			if child:WaitForChild('_stats').player.Value ~= player or not child._stats:FindFirstChild('uuid') then return end
+			if not child:FindFirstChild('_shadow') then return end
 
-		if not unitName then return end
+			local unitName = nil
 
-		Steps[tostring(Step)] = {
-			['money'] = player._stats.resource.Value;
-			['type'] = 'sell_unit_ingame';
-			['pos'] = tostring(child._shadow.CFrame);
-		}
+			for equippedUnitUUID, equippedUnitAbout in pairs(EquippedUnits) do
+				if equippedUnitUUID ~= child._stats.uuid.Value or equippedUnitAbout.id ~= child._stats.id.Value then continue end
+				unitName = equippedUnitAbout.id
+			end
 
-		Macro_ActionTXT.Text = string.format('Action: %s', Step)
-		Macro_TypeTXT.Text = string.format("Type: %s", TypesAndMeaning['sell_unit_ingame'])
-		Macro_UnitTXT.Text = string.format("Unit: %s", unitName)
-		Macro_WaitTXT.Text = string.format("Waiting for: %s$", math.ceil(player._stats.resource.Value) )
+			if not unitName then return end
+
+			Steps[tostring(Step)] = {
+				['money'] = player._stats.resource.Value;
+				['type'] = 'sell_unit_ingame';
+				['pos'] = tostring(child._shadow.CFrame);
+			}
+
+			Macro_ActionTXT.Text = string.format('Action: %s', Step)
+			Macro_TypeTXT.Text = string.format("Type: %s", TypesAndMeaning['sell_unit_ingame'])
+			Macro_UnitTXT.Text = string.format("Unit: %s", unitName)
+			Macro_WaitTXT.Text = string.format("Waiting for: %s$", math.ceil(player._stats.resource.Value) )
 
 
-		Step+=1
+			Step+=1
+			unitSold:Disconnect()
+			unitSold = nil
+		end)
+
+		local tries = 0
+
+		repeat task.wait(0.1) tries += 1
+
+		until tries >= 20 or not unitSold
+
+		if unitSold then unitSold:Disconnect() end
+
 
 	end)
+
 
 
 	repeat task.wait() until not RecordingMacro
