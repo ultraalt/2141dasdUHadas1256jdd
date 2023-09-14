@@ -1,5 +1,5 @@
 
-if not game:IsLoaded() then game.Loaded:Wait() end
+repeat task.wait(0.1) until game:IsLoaded()
 
 local vu = game:GetService("VirtualUser")
 game.Players.LocalPlayer.Idled:connect(function()
