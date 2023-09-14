@@ -3158,7 +3158,7 @@ local function endGameFunc ()
 
 		while true do
 
-			if GetSave(AutoLeave.Name) then TPLobby()
+			if GetSave(AutoLeave.Name) then TPLobby() task.wait(30)
 			elseif GetSave(AutoNextPortal.Name) and LevelData._is_map_or_portal_level then
 				local Portal = getPortalUSE() if not Portal then wait(2) continue end
 				Event['set_game_finished_vote']:InvokeServer('replay', {item_uuid = Portal})
@@ -3766,6 +3766,7 @@ local function autoGamePLUS ()
 		
 		if AutoL and tonumber(AutoLWave) <= workspace._wave_num.Value then
 			TPLobby()
+			task.wait(30)
 		end
 		
 		if (AutoPL or AutoUP) and not (AutoSU and tonumber(AutoSUWave) <= workspace._wave_num.Value) then
@@ -4538,7 +4539,7 @@ if GameFinished and not IsLobby then
 			
 			while true  do
 				TPLobby()
-				task.wait(5)
+				task.wait(30)
 			end
 			
 		end
