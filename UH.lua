@@ -4358,8 +4358,7 @@ local RareDrop = {"Sea God's Portal"}
 local oldPlayerStats = {
 	Gems = player._stats.gem_amount.Value,
 	Gold = player._stats.gold_amount.Value,
-	Pearls = player._stats._resourceSummerPearls.Value,
-	PlayerXP = player._stats.player_xp.Value,
+	PlayerXP = player._stats.player_xp.Value
 }
 
 local contentNewSecretItem = ""
@@ -4382,7 +4381,6 @@ local function webhook ()
 		{name = 'XP', amount = player._stats.player_xp.Value - oldPlayerStats.PlayerXP},
 		{name = 'Gems', amount = player._stats.gem_amount.Value - oldPlayerStats.Gems},
 		{name = 'Gold', amount = player._stats.gold_amount.Value - oldPlayerStats.Gold},
-		{name = 'Summer Pearls', amount = player._stats._resourceSummerPearls.Value - oldPlayerStats.Pearls},
 
 	}
 
@@ -4411,7 +4409,6 @@ local function webhook ()
 	local newGems = ""
 	local TotalGems = makeComma(player._stats.gem_amount.Value)
 	local TotalGold = makeComma(player._stats.gold_amount.Value)
-	local TotalPearl = makeComma(player._stats._resourceSummerPearls.Value)
 	local BattlePass = ''
 	local reachedTier = 0
 	local reachedTierExp = 0
@@ -4479,7 +4476,7 @@ local function webhook ()
 				['fields'] = {
 					{
 						['name'] = "Player Stats",
-						['value'] = string.format( "<:Gems:1148368507029950515> %s\n<:Gold:1148368511463338074> %s\n<:Pearls:1148369019137708193> %s\n:tickets: Tier: %s", TotalGems, TotalGold, TotalPearl, BattlePass),
+						['value'] = string.format( "<:Gems:1148368507029950515> %s\n<:Gold:1148368511463338074> %s\n:tickets: Tier: %s", TotalGems, TotalGold, BattlePass),
 						['inline'] = true
 					},
 
@@ -4528,7 +4525,7 @@ if GameFinished and not IsLobby then
 	
 	repeat task.wait(0.1) until (GameFinished.Value and ResultUI.Enabled) or (GetSave('AutoLeave_WAVE') and tonumber(GetSave('AutoLeaveOnWave')) <= workspace._wave_num.Value)
 	if GetSave(ResultWebhook.Name) then
-		webhook()
+		pcall(function() webhook() end)
 	end
 
 	endGameFunc()
