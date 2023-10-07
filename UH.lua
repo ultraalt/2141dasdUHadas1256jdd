@@ -402,13 +402,7 @@ local macroMapList = {
 	};
 
 	['Portal'] = {
-		'Puppet Island (Summer)',
-		'Shiganshinu District (Summer)',
-		'Fabled Kingdom (Summer)',
-		'Alien Spaceship (Underwater)',
-		'Planet Namak (Summer)',
-		'Ant Kingdom (Summer)',
-		'Cursed Academy (Summer)',
+		"Holy Grail War",
 		'Fabled Kingdom (Cube)',
 		'The Eclipse',
 		'Alien Spaceship (Final)',
