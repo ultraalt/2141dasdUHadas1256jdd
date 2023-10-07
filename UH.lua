@@ -115,20 +115,15 @@ local DefaultFiles = {
 
 }
 
-local PortalsList = {'Alien Portal', 'Summer Portal', 'Eclipse Portal', 'Puppet Portal', "Demon Leader's Portal"}
+local PortalsList = {'Alien Portal', 'Eclipse Portal', 'Puppet Portal', "Demon Leader's Portal", "Noble Portal"}
 
 local portalWorlds = {
-	dressrosa_infinite = 'Puppet Island (Summer)',
-	aot_infinite = 'Shiganshinu District (Summer)',
-	jjk_infinite = 'Cursed Academy (Summer)',
-	namek_infinite = 'Planet Namak (Summer)',
-	['7ds_infinite'] = 'Fabled Kingdom (Summer)',
-	hxhant_infinite = 'Ant Kingdom (Summer)',
-	opm_infinite = 'Alien Spaceship (Underwater)',
+	
 	eclipse_portal = 'The Eclipse',
+	fate_portal = "Holy Grail War"
 }
 
-
+	
 
 challengeTypes = {}
 damageTypes = {}
@@ -276,7 +271,6 @@ for uuid, aboutSlot in pairs(EquippedUnits) do
 	end
 	
 end
-
 
 
 function getLevelData()
