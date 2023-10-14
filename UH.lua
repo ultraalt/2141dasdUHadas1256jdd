@@ -115,11 +115,12 @@ local DefaultFiles = {
 
 }
 
-local PortalsList = {'Alien Portal', 'Eclipse Portal', 'Puppet Portal', "Demon Leader's Portal", "Noble Portal"}
+local PortalsList = {'Port Agency Portal', 'Alien Portal', 'Eclipse Portal', 'Puppet Portal', "Demon Leader's Portal", "Noble Portal"}
 
 local portalWorlds = {
 	
 	eclipse_portal = 'The Eclipse',
+	bsd_portal = 'Detective Mission',
 	fate_portal = "Holy Grail War"
 }
 
